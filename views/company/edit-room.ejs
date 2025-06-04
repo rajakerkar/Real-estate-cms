@@ -1,0 +1,215 @@
+<%- include('../partials/header') %>
+
+<div class="mb-4">
+  <a href="/company/dashboard" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-header bg-primary text-white">
+    <h4 class="mb-0">Edit Property</h4>
+  </div>
+  <div class="card-body">
+    <% if (error) { %>
+      <div class="alert alert-danger">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <form action="/company/rooms/edit/<%= room._id %>" method="POST" enctype="multipart/form-data">
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label for="category" class="form-label">Category</label>
+          <select class="form-select" id="category" name="category" required>
+            <option value="" disabled>Select a category</option>
+            <option value="Villa" <%= room.category === 'Villa' ? 'selected' : '' %>>Villa</option>
+            <option value="Kothi" <%= room.category === 'Kothi' ? 'selected' : '' %>>Kothi</option>
+            <option value="Farmhouse" <%= room.category === 'Farmhouse' ? 'selected' : '' %>>Farmhouse</option>
+            <option value="Apartment" <%= room.category === 'Apartment' ? 'selected' : '' %>>Apartment</option>
+            <option value="Studio" <%= room.category === 'Studio' ? 'selected' : '' %>>Studio</option>
+            <option value="Single Room" <%= room.category === 'Single Room' ? 'selected' : '' %>>Single Room</option>
+            <option value="Penthouse" <%= room.category === 'Penthouse' ? 'selected' : '' %>>Penthouse</option>
+            <option value="Duplex" <%= room.category === 'Duplex' ? 'selected' : '' %>>Duplex</option>
+          </select>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="title" class="form-label">Title</label>
+          <input type="text" class="form-control" id="title" name="title" value="<%= room.title %>" required>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="location" class="form-label">Location</label>
+          <input type="text" class="form-control" id="location" name="location" value="<%= room.location %>" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="price" class="form-label">Price (₹)</label>
+          <input type="number" class="form-control" id="price" name="price" value="<%= room.price %>" required>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label for="size" class="form-label">Size</label>
+          <input type="text" class="form-control" id="size" name="size" value="<%= room.size %>" required>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="4" required><%= room.description %></textarea>
+      </div>
+
+      <!-- Agent Contact Details -->
+      <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">Agent Contact Details</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="agentName" class="form-label">Agent Name</label>
+              <input type="text" class="form-control" id="agentName" name="agentDetails[name]" value="<%= room.agentDetails ? room.agentDetails.name : '' %>">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="agentPhone" class="form-label">Agent Phone</label>
+              <input type="text" class="form-control" id="agentPhone" name="agentDetails[phone]" value="<%= room.agentDetails ? room.agentDetails.phone : '' %>">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="agentEmail" class="form-label">Agent Email</label>
+              <input type="email" class="form-control" id="agentEmail" name="agentDetails[email]" value="<%= room.agentDetails ? room.agentDetails.email : '' %>">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="agentCompany" class="form-label">Agent Company</label>
+              <input type="text" class="form-control" id="agentCompany" name="agentDetails[company]" value="<%= room.agentDetails ? room.agentDetails.company : '' %>">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label for="status" class="form-label">Status</label>
+          <select class="form-select" id="status" name="status">
+            <option value="available" <%= room.status === 'available' ? 'selected' : '' %>>Available</option>
+            <option value="sold" <%= room.status === 'sold' ? 'selected' : '' %>>Sold Out</option>
+          </select>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="rentalStatus" class="form-label">Rental Status</label>
+          <select class="form-select" id="rentalStatus" name="rentalStatus" onchange="toggleRentField()">
+            <option value="not-for-rent" <%= room.rentalStatus === 'not-for-rent' ? 'selected' : '' %>>Not For Rent</option>
+            <option value="for-rent" <%= room.rentalStatus === 'for-rent' ? 'selected' : '' %>>Available For Rent</option>
+          </select>
+        </div>
+
+        <div class="col-md-4 mb-3" id="monthlyRentField" style="<%= room.rentalStatus === 'for-rent' ? '' : 'display: none;' %>">
+          <label for="monthlyRent" class="form-label">Monthly Rent (₹)</label>
+          <input type="number" class="form-control" id="monthlyRent" name="monthlyRent" value="<%= room.monthlyRent %>">
+        </div>
+      </div>
+
+      <!-- Current Images -->
+      <div class="mb-3">
+        <label class="form-label">Current Images</label>
+        <div class="row">
+          <% room.images.forEach((image, index) => { %>
+            <div class="col-md-3 mb-3">
+              <div class="card">
+                <img src="<%= image.path %>" class="card-img-top" alt="Room Image" style="height: 150px; object-fit: cover;">
+                <div class="card-body p-2">
+                  <% if (image.caption) { %>
+                    <p class="small text-muted mb-2"><%= image.caption %></p>
+                  <% } %>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <input type="text" class="form-control form-control-sm me-2" name="existingCaptions[<%= index %>]" value="<%= image.caption %>" placeholder="Caption">
+                    <form action="/company/rooms/<%= room._id %>/images/<%= index %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this image?');">
+                      <button type="submit" class="btn btn-sm btn-danger">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- Add New Images -->
+      <div class="mb-3">
+        <label class="form-label">Add New Images with Captions</label>
+        <div id="imageUploadContainer">
+          <div class="row mb-3 image-row">
+            <div class="col-md-6">
+              <input type="file" class="form-control" name="images" accept="image/*">
+            </div>
+            <div class="col-md-6">
+              <input type="text" class="form-control" name="captions" placeholder="Image caption (optional)">
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" id="addMoreImages">
+          <i class="fas fa-plus"></i> Add Another Image
+        </button>
+        <div class="form-text">Add captions to describe each new image.</div>
+      </div>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          // Add more image fields
+          document.getElementById('addMoreImages').addEventListener('click', function() {
+            const container = document.getElementById('imageUploadContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'row mb-3 image-row';
+            newRow.innerHTML = `
+              <div class="col-md-6">
+                <input type="file" class="form-control" name="images" accept="image/*">
+              </div>
+              <div class="col-md-6">
+                <div class="input-group">
+                  <input type="text" class="form-control" name="captions" placeholder="Image caption (optional)">
+                  <button type="button" class="btn btn-danger remove-image">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+            container.appendChild(newRow);
+
+            // Add event listener to the remove button
+            newRow.querySelector('.remove-image').addEventListener('click', function() {
+              container.removeChild(newRow);
+            });
+          });
+
+          // Toggle monthly rent field based on rental status
+          window.toggleRentField = function() {
+            const rentalStatus = document.getElementById('rentalStatus').value;
+            const monthlyRentField = document.getElementById('monthlyRentField');
+
+            if (rentalStatus === 'for-rent') {
+              monthlyRentField.style.display = 'block';
+            } else {
+              monthlyRentField.style.display = 'none';
+            }
+          };
+
+          // Initialize the rent field visibility
+          toggleRentField();
+        });
+      </script>
+
+      <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary">Update Property</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

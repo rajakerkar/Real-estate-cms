@@ -1,0 +1,86 @@
+<%- include('../partials/header') %>
+
+<div class="mb-4">
+  <h2>My Subscriptions</h2>
+  <p class="lead">Manage your property subscriptions.</p>
+</div>
+
+<div class="card">
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0">All Subscriptions</h5>
+  </div>
+  <div class="card-body">
+    <% if (subscriptions && subscriptions.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Category</th>
+              <th>Price/Month</th>
+              <th>Duration</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% subscriptions.forEach(subscription => { %>
+              <tr>
+                <td>
+                  <% if (subscription.room) { %>
+                    <a href="/room/<%= subscription.room._id %>" target="_blank">
+                      <%= subscription.room.title %>
+                    </a>
+                  <% } else { %>
+                    Unknown
+                  <% } %>
+                </td>
+                <td><%= subscription.category %></td>
+                <td>₹<%= subscription.pricePerMonth %></td>
+                <td><%= subscription.durationMonths %> months</td>
+                <td><%= new Date(subscription.startDate).toLocaleDateString() %></td>
+                <td><%= new Date(subscription.endDate).toLocaleDateString() %></td>
+                <td>
+                  <span class="badge <%= 
+                    subscription.paymentStatus === 'completed' && subscription.isActive ? 'bg-success' : 
+                    subscription.paymentStatus === 'pending' ? 'bg-warning' : 
+                    'bg-danger' 
+                  %>">
+                    <%= subscription.paymentStatus === 'completed' && subscription.isActive ? 'Active' : 
+                       subscription.paymentStatus === 'pending' ? 'Payment Pending' : 
+                       'Inactive' %>
+                  </span>
+                </td>
+                <td>
+                  <% if (subscription.paymentStatus === 'pending') { %>
+                    <a href="/company/subscription/payment/<%= subscription._id %>" class="btn btn-sm btn-primary">
+                      <i class="fas fa-credit-card"></i> Pay Now
+                    </a>
+                  <% } else { %>
+                    <button class="btn btn-sm btn-info" disabled>
+                      <i class="fas fa-check-circle"></i> Paid
+                    </button>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="alert alert-info">
+        You don't have any subscriptions yet. <a href="/company/subscription-plans" class="alert-link">View available plans</a>.
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<div class="text-center mt-3">
+  <a href="/company/dashboard" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </a>
+</div>
+
+<%- include('../partials/footer') %>

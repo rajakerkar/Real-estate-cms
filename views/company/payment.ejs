@@ -1,0 +1,176 @@
+<%- include('../partials/header') %>
+
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Payment</h5>
+      </div>
+      <div class="card-body">
+        <% if (error) { %>
+          <div class="alert alert-danger">
+            <%= error %>
+          </div>
+        <% } %>
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h5>Subscription Details</h5>
+            <table class="table table-bordered">
+              <tr>
+                <th>Property</th>
+                <td>
+                  <% if (subscription.room) { %>
+                    <%= subscription.room.title %>
+                  <% } else { %>
+                    Unknown
+                  <% } %>
+                </td>
+              </tr>
+              <tr>
+                <th>Category</th>
+                <td><%= subscription.category %></td>
+              </tr>
+              <tr>
+                <th>Duration</th>
+                <td><%= subscription.durationMonths %> months</td>
+              </tr>
+              <tr>
+                <th>Price/Month</th>
+                <td>₹<%= subscription.pricePerMonth %></td>
+              </tr>
+              <tr>
+                <th>Total Amount</th>
+                <td>₹<%= subscription.totalAmount %></td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="col-md-6">
+            <h5>Company Details</h5>
+            <table class="table table-bordered">
+              <tr>
+                <th>Name</th>
+                <td><%= company.name %></td>
+              </tr>
+              <tr>
+                <th>Email</th>
+                <td><%= company.email %></td>
+              </tr>
+              <tr>
+                <th>Phone</th>
+                <td><%= company.phone %></td>
+              </tr>
+              <tr>
+                <th>GSTIN</th>
+                <td><%= company.gstin || 'Not provided' %></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Payment Options</h5>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-info">
+              <p><strong>Note:</strong> You will be redirected to Razorpay to complete your payment securely.</p>
+            </div>
+
+            <form id="paymentForm">
+              <input type="hidden" name="subscriptionId" id="subscriptionId" value="<%= subscription._id %>">
+              <input type="hidden" name="amount" id="amount" value="<%= subscription.totalAmount * 100 %>">
+              <input type="hidden" name="currency" id="currency" value="INR">
+              <input type="hidden" name="companyName" id="companyName" value="<%= company.name %>">
+              <input type="hidden" name="companyEmail" id="companyEmail" value="<%= company.email %>">
+              <input type="hidden" name="companyPhone" id="companyPhone" value="<%= company.phone %>">
+
+              <div class="d-grid gap-2">
+                <button type="button" id="razorpayButton" class="btn btn-success btn-lg">
+                  <i class="fas fa-credit-card me-2"></i> Pay ₹<%= subscription.totalAmount %>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <a href="/company/subscriptions" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Subscriptions
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Razorpay Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const razorpayButton = document.getElementById('razorpayButton');
+
+  razorpayButton.addEventListener('click', function() {
+    // Get form values
+    const subscriptionId = document.getElementById('subscriptionId').value;
+    const amount = document.getElementById('amount').value;
+    const currency = document.getElementById('currency').value;
+    const companyName = document.getElementById('companyName').value;
+    const companyEmail = document.getElementById('companyEmail').value;
+    const companyPhone = document.getElementById('companyPhone').value;
+
+    // Create a new order
+    fetch('/company/subscription/create-order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        subscriptionId,
+        amount,
+        currency
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        alert('Error: ' + data.error);
+        return;
+      }
+
+      // Configure Razorpay options
+      const options = {
+        key: 'rzp_test_iS9R1nl7rLoc80',
+        amount: amount,
+        currency: currency,
+        name: 'Real Estate CMS',
+        description: 'Subscription Payment',
+        order_id: data.orderId,
+        prefill: {
+          name: companyName,
+          email: companyEmail,
+          contact: companyPhone
+        },
+        theme: {
+          color: '#3399cc'
+        },
+        handler: function(response) {
+          // Handle successful payment
+          window.location.href = `/company/subscription/payment-success?subscriptionId=${subscriptionId}&paymentId=${response.razorpay_payment_id}&orderId=${response.razorpay_order_id}&signature=${response.razorpay_signature}`;
+        }
+      };
+
+      // Initialize Razorpay
+      const razorpay = new Razorpay(options);
+      razorpay.open();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again.');
+    });
+  });
+});
+</script>
+
+<%- include('../partials/footer') %>

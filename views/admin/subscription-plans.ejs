@@ -1,0 +1,92 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Subscription Plans</h2>
+  <a href="/admin/subscription-plans/add" class="btn btn-success">
+    <i class="fas fa-plus"></i> Add New Plan
+  </a>
+</div>
+
+<% if (locals.flash && flash.success && flash.success.length > 0) { %>
+  <div class="alert alert-success">
+    <%= flash.success[0] %>
+  </div>
+<% } %>
+
+<% if (locals.flash && flash.error && flash.error.length > 0) { %>
+  <div class="alert alert-danger">
+    <%= flash.error[0] %>
+  </div>
+<% } %>
+
+<div class="card">
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0">All Subscription Plans</h5>
+  </div>
+  <div class="card-body">
+    <% if (subscriptionPlans && subscriptionPlans.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Plan Name</th>
+              <th>Price/Month (₹)</th>
+              <th>Description</th>
+              <th>Features</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% subscriptionPlans.forEach(plan => { %>
+              <tr>
+                <td><%= plan.name %></td>
+                <td>₹<%= plan.pricePerMonth %></td>
+                <td><%= plan.description || 'No description' %></td>
+                <td>
+                  <% if (plan.features && plan.features.length > 0) { %>
+                    <ul class="mb-0 ps-3">
+                      <% plan.features.slice(0, 2).forEach(feature => { %>
+                        <li><%= feature %></li>
+                      <% }); %>
+                      <% if (plan.features.length > 2) { %>
+                        <li>+ <%= plan.features.length - 2 %> more</li>
+                      <% } %>
+                    </ul>
+                  <% } else { %>
+                    <span class="text-muted">No features listed</span>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="badge <%= plan.isActive ? 'bg-success' : 'bg-danger' %>">
+                    <%= plan.isActive ? 'Active' : 'Inactive' %>
+                  </span>
+                </td>
+                <td><%= new Date(plan.createdAt).toLocaleDateString() %></td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a href="/admin/subscription-plans/edit/<%= plan._id %>" class="btn btn-primary">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <form action="/admin/subscription-plans/<%= plan._id %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this plan?');">
+                      <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="alert alert-info">
+        No subscription plans found. <a href="/admin/subscription-plans/add" class="alert-link">Add your first plan</a>.
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

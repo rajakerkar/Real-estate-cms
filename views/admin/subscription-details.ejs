@@ -1,0 +1,204 @@
+<%- include('../partials/header') %>
+
+<div class="mb-4">
+  <a href="/admin/subscriptions" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i> Back to Subscriptions
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-header bg-primary text-white">
+    <h4 class="mb-0">Subscription Details</h4>
+  </div>
+  <div class="card-body">
+    <% if (locals.flash && flash.success && flash.success.length > 0) { %>
+      <div class="alert alert-success">
+        <%= flash.success[0] %>
+      </div>
+    <% } %>
+
+    <% if (locals.flash && flash.error && flash.error.length > 0) { %>
+      <div class="alert alert-danger">
+        <%= flash.error[0] %>
+      </div>
+    <% } %>
+
+    <div class="row">
+      <div class="col-md-6">
+        <h5>Subscription Information</h5>
+        <table class="table table-bordered">
+          <tr>
+            <th>ID</th>
+            <td><%= subscription._id %></td>
+          </tr>
+          <tr>
+            <th>Plan</th>
+            <td>
+              <% if (subscription.plan) { %>
+                <%= subscription.plan.name %>
+              <% } else { %>
+                <%= subscription.planName %>
+              <% } %>
+            </td>
+          </tr>
+          <tr>
+            <th>Price/Month</th>
+            <td>₹<%= subscription.pricePerMonth %></td>
+          </tr>
+          <tr>
+            <th>Duration</th>
+            <td><%= subscription.durationMonths %> months</td>
+          </tr>
+          <tr>
+            <th>Total Amount</th>
+            <td>₹<%= subscription.totalAmount %></td>
+          </tr>
+          <tr>
+            <th>Start Date</th>
+            <td><%= new Date(subscription.startDate).toLocaleDateString() %></td>
+          </tr>
+          <tr>
+            <th>End Date</th>
+            <td><%= new Date(subscription.endDate).toLocaleDateString() %></td>
+          </tr>
+          <tr>
+            <th>Payment Status</th>
+            <td>
+              <span class="badge <%=
+                subscription.paymentStatus === 'completed' ? 'bg-success' :
+                subscription.paymentStatus === 'pending' ? 'bg-warning' :
+                'bg-danger'
+              %>">
+                <%= subscription.paymentStatus %>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <th>Active Status</th>
+            <td>
+              <span class="badge <%= subscription.isActive ? 'bg-success' : 'bg-danger' %>">
+                <%= subscription.isActive ? 'Active' : 'Inactive' %>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <th>Created At</th>
+            <td><%= new Date(subscription.createdAt).toLocaleString() %></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="col-md-6">
+        <h5>Company Information</h5>
+        <% if (subscription.company) { %>
+          <table class="table table-bordered">
+            <tr>
+              <th>Name</th>
+              <td><%= subscription.company.name %></td>
+            </tr>
+            <tr>
+              <th>Email</th>
+              <td><%= subscription.company.email %></td>
+            </tr>
+            <tr>
+              <th>Phone</th>
+              <td><%= subscription.company.phone %></td>
+            </tr>
+            <tr>
+              <th>Status</th>
+              <td>
+                <span class="badge <%= subscription.company.isActive ? 'bg-success' : 'bg-danger' %>">
+                  <%= subscription.company.isActive ? 'Active' : 'Inactive' %>
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <div class="mt-3">
+            <a href="/admin/companies/<%= subscription.company._id %>" class="btn btn-info">
+              <i class="fas fa-building"></i> View Company Details
+            </a>
+          </div>
+        <% } else { %>
+          <div class="alert alert-warning">
+            Company information not available
+          </div>
+        <% } %>
+
+        <h5 class="mt-4">Subscription Plan</h5>
+        <% if (subscription.plan) { %>
+          <table class="table table-bordered">
+            <tr>
+              <th>Name</th>
+              <td><%= subscription.plan.name %></td>
+            </tr>
+            <tr>
+              <th>Description</th>
+              <td><%= subscription.plan.description || 'No description' %></td>
+            </tr>
+            <tr>
+              <th>Features</th>
+              <td>
+                <% if (subscription.plan.features && subscription.plan.features.length > 0) { %>
+                  <ul class="mb-0">
+                    <% subscription.plan.features.forEach(feature => { %>
+                      <li><%= feature %></li>
+                    <% }); %>
+                  </ul>
+                <% } else { %>
+                  <span class="text-muted">No features listed</span>
+                <% } %>
+              </td>
+            </tr>
+          </table>
+
+          <div class="mt-3">
+            <a href="/admin/subscription-plans/edit/<%= subscription.plan._id %>" class="btn btn-info">
+              <i class="fas fa-edit"></i> Edit Plan
+            </a>
+          </div>
+        <% } else { %>
+          <div class="alert alert-warning">
+            Plan information not available
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (subscription.paymentDetails && Object.keys(subscription.paymentDetails).length > 0) { %>
+      <div class="mt-4">
+        <h5>Payment Details</h5>
+        <div class="card">
+          <div class="card-body">
+            <pre class="mb-0"><%= JSON.stringify(subscription.paymentDetails, null, 2) %></pre>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <div class="mt-4">
+      <h5>Update Subscription Status</h5>
+      <form action="/admin/subscriptions/<%= subscription._id %>/status" method="POST">
+        <div class="mb-3">
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="status" id="statusActive" value="active" <%= subscription.isActive ? 'checked' : '' %>>
+            <label class="form-check-label" for="statusActive">
+              Active
+            </label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="status" id="statusInactive" value="inactive" <%= !subscription.isActive ? 'checked' : '' %>>
+            <label class="form-check-label" for="statusInactive">
+              Inactive
+            </label>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">
+          Update Status
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

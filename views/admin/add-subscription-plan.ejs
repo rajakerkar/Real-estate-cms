@@ -1,0 +1,54 @@
+<%- include('../partials/header') %>
+
+<div class="mb-4">
+  <a href="/admin/subscription-plans" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i> Back to Subscription Plans
+  </a>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Add Subscription Plan</h4>
+      </div>
+      <div class="card-body">
+        <% if (error) { %>
+          <div class="alert alert-danger">
+            <%= error %>
+          </div>
+        <% } %>
+
+        <form action="/admin/subscription-plans/add" method="POST">
+          <div class="mb-3">
+            <label for="name" class="form-label">Plan Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="<%= locals.formData && formData.name || '' %>" required>
+            <small class="form-text text-muted">E.g., Basic, Standard, Premium, etc.</small>
+          </div>
+
+          <div class="mb-3">
+            <label for="pricePerMonth" class="form-label">Price Per Month (₹)</label>
+            <input type="number" class="form-control" id="pricePerMonth" name="pricePerMonth" value="<%= locals.formData && formData.pricePerMonth || '' %>" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label">Description (Optional)</label>
+            <textarea class="form-control" id="description" name="description" rows="3"><%= locals.formData && formData.description || '' %></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="features" class="form-label">Features (Optional)</label>
+            <textarea class="form-control" id="features" name="features" rows="5" placeholder="Enter one feature per line"><%= locals.formData && formData.features || '' %></textarea>
+            <small class="form-text text-muted">Enter one feature per line. E.g., "Unlimited property listings", "Featured in search results", etc.</small>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Add Subscription Plan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

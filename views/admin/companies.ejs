@@ -1,0 +1,57 @@
+<%- include('../partials/header') %>
+
+<div class="mb-4">
+  <h2>All Companies</h2>
+</div>
+
+<div class="card">
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0">Company List</h5>
+  </div>
+  <div class="card-body">
+    <% if (companies && companies.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Contact Person</th>
+              <th>Status</th>
+              <th>Registered On</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% companies.forEach(company => { %>
+              <tr>
+                <td><%= company.name %></td>
+                <td><%= company.email %></td>
+                <td><%= company.phone %></td>
+                <td><%= company.contactPerson.name %></td>
+                <td>
+                  <span class="badge <%= company.isActive ? 'bg-success' : 'bg-danger' %>">
+                    <%= company.isActive ? 'Active' : 'Inactive' %>
+                  </span>
+                </td>
+                <td><%= new Date(company.createdAt).toLocaleDateString() %></td>
+                <td>
+                  <a href="/admin/companies/<%= company._id %>" class="btn btn-sm btn-info">
+                    <i class="fas fa-eye"></i> Details
+                  </a>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="alert alert-info">
+        No companies found.
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

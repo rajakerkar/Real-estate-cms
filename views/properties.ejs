@@ -1,0 +1,109 @@
+<%- include('./partials/header') %>
+
+<div class="jumbotron bg-primary text-white p-5 rounded">
+  <h1 class="display-4">All Available Properties</h1>
+  <p class="lead">Browse our complete collection of premium properties available for purchase.</p>
+</div>
+
+<div class="my-5">
+  <!-- Filter Section -->
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Filter Properties</h5>
+    </div>
+    <div class="card-body">
+      <form action="/properties" method="GET" id="filterForm">
+        <div class="row">
+          <!-- Category Filter -->
+          <div class="col-md-3 mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select" id="category" name="category">
+              <option value="all" <%= filters.category === 'all' ? 'selected' : '' %>>All Categories</option>
+              <% categories.forEach(cat => { %>
+                <option value="<%= cat %>" <%= filters.category === cat ? 'selected' : '' %>><%= cat %></option>
+              <% }); %>
+            </select>
+          </div>
+
+          <!-- Price Range Filter -->
+          <div class="col-md-3 mb-3">
+            <label for="minPrice" class="form-label">Min Price (₹)</label>
+            <input type="number" class="form-control" id="minPrice" name="minPrice" value="<%= filters.minPrice %>" placeholder="Min Price">
+          </div>
+          <div class="col-md-3 mb-3">
+            <label for="maxPrice" class="form-label">Max Price (₹)</label>
+            <input type="number" class="form-control" id="maxPrice" name="maxPrice" value="<%= filters.maxPrice %>" placeholder="Max Price">
+          </div>
+
+          <!-- Location Filter -->
+          <div class="col-md-3 mb-3">
+            <label for="location" class="form-label">Location</label>
+            <input type="text" class="form-control" id="location" name="location" value="<%= filters.location %>" placeholder="Enter location">
+          </div>
+
+          <!-- Rental Status Filter -->
+          <div class="col-md-3 mb-3">
+            <label for="forRent" class="form-label">Rental Status</label>
+            <select class="form-select" id="forRent" name="forRent">
+              <option value="all" <%= filters.forRent === 'all' ? 'selected' : '' %>>All Properties</option>
+              <option value="true" <%= filters.forRent === 'true' ? 'selected' : '' %>>For Rent</option>
+              <option value="false" <%= filters.forRent === 'false' ? 'selected' : '' %>>Not For Rent</option>
+            </select>
+          </div>
+
+          <!-- Filter Buttons -->
+          <div class="col-md-6 mb-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2">
+              <i class="fas fa-filter"></i> Apply Filters
+            </button>
+            <a href="/properties" class="btn btn-secondary">
+              <i class="fas fa-undo"></i> Reset Filters
+            </a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Available Properties</h2>
+  </div>
+
+  <% if (rooms.length === 0) { %>
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle"></i> No properties available matching your criteria. Try adjusting your filters.
+    </div>
+  <% } else { %>
+    <div class="row" id="propertiesContainer">
+      <% rooms.forEach(room => { %>
+        <div class="col-lg-4 col-md-6 mb-4">
+          <%- include('./partials/room-card', { room }) %>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .hover-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form when select fields change
+    const selectFields = document.querySelectorAll('select');
+    selectFields.forEach(select => {
+      select.addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+      });
+    });
+  });
+</script>
+
+<%- include('./partials/footer') %>
